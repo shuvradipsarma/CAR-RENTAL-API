@@ -1,7 +1,9 @@
 import mongoose,{Schema} from "mongoose"
 import bcrypt from "bcrypt"
+import { v4 as uuidv4 } from 'uuid';
+import jwt from "jsonwebtoken";
 
-const userSchema = new Schema({
+const userSchema = new mongoose.Schema({
     name:{
         type:String,
         required:true,
@@ -9,9 +11,7 @@ const userSchema = new Schema({
     },
     userId:{
         type:String,
-        required:true,
-        trim:true,
-        lowercase:true,
+        default: uuidv4,
         unique:true
     },
     email:{
@@ -25,13 +25,24 @@ const userSchema = new Schema({
         type:String,
         required:[true,'password is required']
     },
+    refreshToken:{
+        type:String
+    },
     role:{
         type:String,
         enum:['user','admin'],
     }
-})
+},{timestamp:true})
+
+// userSchema.pre('save', function (next) {
+//     if (!this.userId) {
+//         this.userId = uuidv4(); // Generate a unique ID
+//     }
+//     next();
+// });
 
 userSchema.pre('save',async function(next){
+
     if(!this.isModified(this.password))
     {
         return next()
@@ -60,7 +71,7 @@ userSchema.methods.generateAccessToken = function()
 }
 
 userSchema.methods.generateRefreshToken = function(){
-    jwt.sign(
+    return jwt.sign(
         {
         _id:this._id,
         },

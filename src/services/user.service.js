@@ -1,7 +1,8 @@
 import { User } from "../models/user.model.js";
+import {asyncHandler} from "../utils/asyncHandler.js"
 import {ApiError} from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
-import jwt from jsonwebtoken
+import bcrypt from "bcrypt"
 
 const registerUser = asyncHandler(async(req,res)=>{
     // de-structure info from json req 
@@ -25,12 +26,10 @@ const registerUser = asyncHandler(async(req,res)=>{
         throw new ApiError(400,"Password must be of atleast 6 characters long!")
     }
 
-    // Hash the user password
-    // Hashing takes time
-    const hashedPassword = await bcrypt.hash(password,10)
-
+    
     // Check if user already exists or not
-    const existedUser = User.findOne({
+    // $ - query operator
+    const existedUser = await User.findOne({
         $or:[{name},{email}]
     })
 
@@ -40,11 +39,91 @@ const registerUser = asyncHandler(async(req,res)=>{
         throw new ApiError(400, "User already exists")
     }
 
+    // Hash the user password
+    // Hashing takes time
+    // salt rounds - 10
+    const hashedPassword = await bcrypt.hash(password,10)
+
     // If new user then add their details to DB
-    const user = new User({
+    const user = await User.create({
         name,
         email,
         password:hashedPassword
     })
+    console.log(user);
+
+    // Find id of the created user from DB
+    const createdUser = await User.findById(user._id).select("-password -refreshToken")
+    
+    if(!createdUser)
+    {
+        throw new ApiError(500,"User Registration Failed!")
+
+    }
+
+    return res.status(201).json({
+        response : new ApiResponse(
+            200,
+            createdUser,
+            "User Registered Successfully",
+        )
+    })
 })
+
+const authenticateUser = asyncHandler(async(req,res)=>{
+    // de-structure email and password from req.body
+    const {email,password} = req.body 
+
+    if(!email || !password)
+    {
+        throw new ApiError(400,"Email and password is required")
+    }
+
+    // Check if the user exists in DB or not
+
+    // NOTE _ "user" is obj reference of the instance of User model which
+    // essentially a single document from the collection. 
+    // This instance has its properties (e.g., user.name, user.email, user.password).
+    const user = await User.findOne({
+        $or:[{email}]
+    })
+
+    if(!user)
+    {
+        throw new ApiError(400,"Invalid email entered!")
+    }
+
+    const isPasswordValid = await bcrypt.compare(password,user.password)
+    if(!isPasswordValid)
+    {
+        throw new ApiError(401,"Unauthorized, Password is incorrect!")
+    }
+
+    // If both email and password is valid, generate Access and Refresh tokens
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    // Save the refreshToken in the database
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    // return the tokens to the client
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            "Authentication Successful",
+            {
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                user:{
+                    id:user._id,
+                    name:user.name,
+                    email:user.email
+                }
+            }
+        )
+    )
+})
+
+export {registerUser,authenticateUser}
 
