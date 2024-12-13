@@ -3,10 +3,42 @@ import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 
+// Car-Availability logic
+const checkCarAvailability = asyncHandler(async(req,res)=>{
+    const {carId} = req.body
+
+    if(!carId)
+    {
+        throw new ApiError(400,"Car Id is required")
+    }
+
+    // Fetch the car from DB
+    const car = Car.findById(carId)
+
+    // check car availability in DB
+    if(!car)
+    {
+        throw new ApiError(404,"Car not found")
+    }
+
+    // send the response
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                carId: carId,
+                isAvailability: car.isAvailability
+            },
+            car.isAvailability ? "Car is available" : "Car is not available"
+        )
+    )
+})
+
+
 // Rent-Car service logic
 const rentCar = asyncHandler(async(req,res)=>{
     // de-structure info from json request
-    const {userId,carId,startDate,endDate} = req.body
+    const {email,carId,startDate,endDate} = req.body
 
     // validate user inputs
     if([userId,carId,startDate,endDate].some(value => value == null || value.trim() == ''))
@@ -46,7 +78,7 @@ const rentCar = asyncHandler(async(req,res)=>{
     })
 
     // send the response
-    res.status(200).json(
+    return res.status(200).json(
         new ApiResponse(
             200,
             {
@@ -59,3 +91,5 @@ const rentCar = asyncHandler(async(req,res)=>{
         )
     )
 })
+
+export {checkCarAvailability,rentCar}

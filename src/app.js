@@ -16,6 +16,9 @@ app.use(cookieParser())  // Parses cookies attached to the client request object
 
 // import routes
 import userRouter from "./routes/user.routes.js"
+import carRouter from "./routes/car.routes.js"
+
 app.use("/api/v1/users",userRouter)
+app.use("api/v1/cars",carRouter)
 
 export {app}
