@@ -1,4 +1,5 @@
 import {Car} from "../models/car.model.js"
+import {User} from "../models/user.model.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
@@ -38,10 +39,10 @@ const checkCarAvailability = asyncHandler(async(req,res)=>{
 // Rent-Car service logic
 const rentCar = asyncHandler(async(req,res)=>{
     // de-structure info from json request
-    const {email,carId,startDate,endDate} = req.body
+    const {email,carId,startDate,endDate,pricePerDay} = req.body
 
     // validate user inputs
-    if([userId,carId,startDate,endDate].some(value => value == null || value.trim() == ''))
+    if([email,carId,startDate,endDate].some(value => value == null || value.trim() == ''))
     {
         throw new ApiError(400,"All fields are required")
     }
@@ -65,24 +66,31 @@ const rentCar = asyncHandler(async(req,res)=>{
     }
 
     // calculate the total rental cost
-    const rentalDays = Math.ceil((rentalEnd - rentalStart) / (1000 * 60 * 60 * 24))
+    const rentalDays = Math.ceil((rentEnd - rentStart) / (1000 * 60 * 60 * 24))
     const totalPrice = rentalDays * car.pricePerDay
+
+    // Initialize rentalHistory if undefined
+    if (!Array.isArray(car.rentalHistory)) {
+        car.rentalHistory = [];
+    }
+
+    // rent a car
+    car.rentalHistory.push({
+        email: email,
+        startDate: rentStart,
+        endDate: rentEnd,
+        price: totalPrice
+    })
 
     // update car's availability and add rentalHistory
     car.isAvailability = false
-    car.rentalHistory.push({
-        userId,
-        startDate: rentStart,
-        endDate: rentEnd,
-        totalPrice
-    })
-
+    
     // send the response
     return res.status(200).json(
         new ApiResponse(
             200,
             {
-                user: userId,
+                email: email,
                 carId: carId,
                 startDate: rentStart,
                 endDate: rentEnd,
