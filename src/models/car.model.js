@@ -1,10 +1,10 @@
 import mongoose,{Schema} from "mongoose"
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from "nanoid";
 
 const carSchema = new mongoose.Schema({
     carId:{
         type:String,
-        default: uuidv4,
+        default: () => nanoid(4),
         unique: true
     },
     manufacturer:{

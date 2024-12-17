@@ -5,5 +5,5 @@ const carRouter = Router()
 
 carRouter.route("/check-available").get(checkCarAvailability)
 carRouter.route("/rent").post(rentCar)
-
+carRouter.route("/add-car")
 export default carRouter;

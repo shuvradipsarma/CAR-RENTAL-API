@@ -1,6 +1,6 @@
 import mongoose,{Schema} from "mongoose"
 import bcrypt from "bcrypt"
-import { v4 as uuidv4 } from 'uuid';
+import {nanoid} from "nanoid"
 import jwt from "jsonwebtoken";
 
 const userSchema = new mongoose.Schema({
@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     },
     userId:{
         type:String,
-        default: uuidv4,
+        default: () => nanoid(4),
         unique:true
     },
     email:{
