@@ -9,7 +9,7 @@ const addCar = asyncHandler(async(req,res)=>{
     const {manufacturer, model, year, pricePerDay, isAvailability} = req.body
     
     // validity check 
-    if([manufacturer, model, year, pricePerDay, isAvailability],some(value => value == null || value.trim() == ''))
+    if([manufacturer, model, year, pricePerDay, isAvailability].some(value => value == null || value.trim() == ''))
     {
         throw new ApiError(400,"All fields are required")
     }
@@ -25,26 +25,28 @@ const addCar = asyncHandler(async(req,res)=>{
         throw new ApiError(400,"Price per day cannot be negative!")
     }
 
+    var carAvailability;
+
     // set the car-availability, isAvailability defaults to true if not explicitly provided.
     if(req.body.isAvailability !== undefined) // strict inequality check
     {
-        isAvailability = req.body.isAvailability // use value provided in req body 
+        carAvailability = req.body.isAvailability // use value provided in req body 
     }
     else
     {
-        isAvailability = true // set the default value
+        carAvailability = true // set the default value
     }
 
     // create the car object 
-    const car = new Car.create({
+    const car = await Car.create({
         manufacturer,
         model,
         year,
         pricePerDay,
-        isAvailability
+        isAvailability: carAvailability
     })
 
-    return req.status(201).json({
+    return res.status(201).json({
         response: new ApiResponse(
             201,
             car,
@@ -53,4 +55,27 @@ const addCar = asyncHandler(async(req,res)=>{
     })
 })
 
-export {addCar}
+// Get Car by its Id
+const getCarById = asyncHandler(async(req,res)=>{
+    const {carId} = req.params
+    if(carId == null || carId == '')
+    {
+        throw new ApiError(400,"Car Id field required")
+    }
+    
+    const car = await Car.findById(carId)
+    if(!car)
+    {
+        throw new ApiError(400,"Car Id donot exists")
+    }
+
+    return res.status(200).json({
+        response: new ApiResponse(
+            200,
+            car,
+            "Car found successfully"
+        )
+    })
+})
+
+export {addCar,getCarById}

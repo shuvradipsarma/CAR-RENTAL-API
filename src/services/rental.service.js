@@ -42,7 +42,7 @@ const rentCar = asyncHandler(async(req,res)=>{
     const {email,carId,startDate,endDate,pricePerDay} = req.body
 
     // validate user inputs
-    if([email,carId,startDate,endDate].some(value => value == null || value.trim() == ''))
+    if([email,carId,startDate,endDate,pricePerDay].some(value => value == null || value.trim() == ''))
     {
         throw new ApiError(400,"All fields are required")
     }
@@ -52,17 +52,30 @@ const rentCar = asyncHandler(async(req,res)=>{
     const rentEnd = new Date(endDate)
     
     // check validity of start and ending dates
-    if(rentEnd < startDate)
+    if(rentEnd < rentStart)
     {
         throw new ApiError(400," rental end date is greater than starting date!")
     }
 
     // check availability of car requested
-    const car = Car.findById(carId) // get the carId from DB
+    const car = await Car.findOne({carId}) // get the carId from DB
 
     if(!car)
     {
-        throw new ApiError(404,"car is unavailable for rent")
+        throw new ApiError(404,"car not found!")
+    }
+
+    if(!car.isAvailability)
+    {
+        throw new ApiError(400,"car is unavailable for rent!")
+    }
+
+    // find the user by email
+    const user = await User.findOne({email}) // get the user by email from DB
+
+    if(!user)
+    {
+        throw new ApiError(400,"User not found")
     }
 
     // calculate the total rental cost
@@ -76,26 +89,25 @@ const rentCar = asyncHandler(async(req,res)=>{
 
     // rent a car
     car.rentalHistory.push({
-        email: email,
+        email: user.email, // email: user._id
         startDate: rentStart,
         endDate: rentEnd,
-        price: totalPrice
+        totalPrice: totalPrice
     })
 
     // update car's availability and add rentalHistory
     car.isAvailability = false
+    await car.save(); // Save the updated car to the database
     
     // send the response
     return res.status(200).json(
         new ApiResponse(
             200,
             {
-                email: email,
-                carId: carId,
-                startDate: rentStart,
-                endDate: rentEnd,
-                price: totalPrice
-            }
+                rentalHistory: car.rentalHistory,
+                availability: car.isAvailability
+            },
+            "Car rented successfully!"
         )
     )
 })

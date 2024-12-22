@@ -1,4 +1,4 @@
-import mongoose,{Schema} from "mongoose"
+import mongoose,{Mongoose, Schema} from "mongoose"
 import { nanoid } from "nanoid";
 
 const carSchema = new mongoose.Schema({
@@ -24,7 +24,7 @@ const carSchema = new mongoose.Schema({
         max: new Date().getFullYear() //current date  
     },
     pricePerDay:{
-        type: String,
+        type: Number,
         required: true,
         min: 0 // ensures price >= 0 (can't be negative) 
     },
@@ -36,8 +36,9 @@ const carSchema = new mongoose.Schema({
     rentalHistory: [
         {
             email: {
-                type: mongoose.Schema.Types.ObjectId, // Reference to the User model
-                ref: "User", // Establish the relationship
+                type: String,
+                // type: mongoose.Schema.Types.ObjectId, // Reference to the User model
+                // ref: "User", // Establish the relationship
                 required: true
             },
             startDate: {
