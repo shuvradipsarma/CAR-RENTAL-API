@@ -97,6 +97,7 @@ const getAvailableCars = asyncHandler(async(req,res)=>{
     }
 
     const availableCars = await Car.find({isAvailability:true}) // await since DB call 
+    
     return res.status(200).json({
         response: new ApiResponse(
             200,
