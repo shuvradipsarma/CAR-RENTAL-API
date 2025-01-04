@@ -14,6 +14,15 @@ app.use(express.urlencoded({extended:true,limit:"16kb"})) // Parses URL-encoded 
 app.use(express.static("public")) // Serves static files(images,css,js) from the "public" directory.
 app.use(cookieParser())  // Parses cookies attached to the client request object.
 
+app.use((err, req, res, next) => {
+    const statusCode = err.status || 500;
+    res.status(statusCode).json({
+        status: statusCode,
+        message: err.message || "Internal Server Error",
+    });
+});
+
+
 // import routes
 import userRouter from "./routes/user.routes.js"
 import carRouter from "./routes/car.routes.js"

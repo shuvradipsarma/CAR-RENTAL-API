@@ -56,6 +56,47 @@ const addCar = asyncHandler(async(req,res)=>{
     })
 })
 
+const updateCar = asyncHandler(async(req,res)=>{
+    const { carId, model, manufacturer, year, pricePerDay, isAvailability } = req.body;
+
+    // Validate carId
+    if (!carId) {
+        throw new ApiError(400, "Car ID is required");
+    }
+
+    // Fetch the car by carId
+    const car = await Car.findOne({ carId });
+    if (!car) {
+        throw new ApiError(404, "Car not found");
+    }
+
+    // Update the existing car's fields
+    if (model) car.model = model.trim();
+    if (manufacturer) car.manufacturer = manufacturer.trim();
+    if (pricePerDay != null) car.pricePerDay = pricePerDay;
+    if (year) car.year = year;
+    if (isAvailability != null) car.isAvailability = isAvailability;
+
+    // Save changes to the database
+    await car.save();
+
+    // Send response with updated car details
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {
+                carId: car.carId,
+                model: car.model,
+                manufacturer: car.manufacturer,
+                pricePerDay: car.pricePerDay,
+                year: car.year,
+                isAvailability: car.isAvailability,
+            },
+            "Car information updated successfully!"
+        )
+    )
+})
+
 // Get Car by its Id
 const getCarById = asyncHandler(async(req,res)=>{
     const {carId} = req.query
@@ -109,4 +150,26 @@ const getAvailableCars = asyncHandler(async(req,res)=>{
     })
 })
 
-export {addCar,getCarById,getAvailableCars}
+const deleteCar = asyncHandler(async(req,res)=>{
+    const {carId} = req.params
+
+    if (!carId || carId.trim() === '') {
+        throw new ApiError(400, "Car ID is required");
+    }
+
+    const car = await Car.findByIdAndDelete(carId);
+
+    if (!car) {
+        throw new ApiError(404, "Car not found");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            null,
+            "Car deleted successfully"
+        )
+    )
+})
+
+export {addCar, getCarById, getAvailableCars, deleteCar, updateCar}
