@@ -5,13 +5,13 @@ import { verifyJWT } from "../middlewares/auth.middlewares.js"
 const carRouter = Router()
 
 // Define routes
-carRouter.route("/add-car").post(verifyJWT,addCarController)
+carRouter.route("/addCar").post(verifyJWT,addCarController)
 carRouter.route("/rent").post(verifyJWT,rentCarController)
-carRouter.route("/check-available-cars").get(verifyJWT,checkCarAvailabilityController)
-carRouter.route("/list-available-cars").get(verifyJWT,getAvailableCarsController)
-carRouter.route("/update-car").patch(verifyJWT,updateCarController)
-carRouter.route("/delete-car").delete(verifyJWT,deleteCarController)
-carRouter.route("/get-car-id").get(verifyJWT,getCarByIdController)
+carRouter.route("/checkAvailableCars").get(verifyJWT,checkCarAvailabilityController)
+carRouter.route("/listAvailableCars").get(verifyJWT,getAvailableCarsController)
+carRouter.route("/updateCar").patch(verifyJWT,updateCarController)
+carRouter.route("/deleteCar").delete(verifyJWT,deleteCarController)
+carRouter.route("/getCarById").get(verifyJWT,getCarByIdController)
 
 export default carRouter
 

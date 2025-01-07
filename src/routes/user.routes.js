@@ -8,8 +8,8 @@ const userRouter = Router()
 // Define routes 
 userRouter.route("/register").post(registerUserController)
 userRouter.route("/login").post(authenticateUserController)
-userRouter.route("/user-details-id").get(verifyJWT,getUserByIdController)
-userRouter.route("/user-details-email").get(verifyJWT,getUserByEmailController)
+userRouter.route("/userDetailsById").get(verifyJWT,getUserByIdController)
+userRouter.route("/userDetailsByEmail").get(verifyJWT,getUserByEmailController)
 userRouter.route("/logout").post(verifyJWT, logOutUser)
 
 export default userRouter
