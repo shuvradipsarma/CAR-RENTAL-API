@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 // function to send email
 const sendEmail = async({to,subject,text,html}) => {
     const info = await transporter.sendMail({
-        from: "process.env.USER", // sender address
+        from: process.env.USER, // sender address
         to, // recipient's email
         subject, // subject line
         text, // plain text body 
