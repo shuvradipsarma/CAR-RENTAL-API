@@ -57,7 +57,8 @@ const addCar = asyncHandler(async(req,res)=>{
 })
 
 const updateCar = asyncHandler(async(req,res)=>{
-    const { carId, model, manufacturer, year, pricePerDay, isAvailability } = req.body;
+    const {model, manufacturer, year, pricePerDay, isAvailability} = req.body;
+    const carId = req.params.id
 
     // Validate carId
     if (!carId) {
