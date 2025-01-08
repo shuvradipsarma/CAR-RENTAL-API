@@ -5,8 +5,8 @@ import { verifyJWT } from "../middlewares/auth.middlewares.js"
 const carRouter = Router()
 
 // Define routes
-carRouter.route("/addCar").post(verifyJWT,addCarController)
-carRouter.route("/rent").post(verifyJWT,rentCarController)
+carRouter.route("/").post(verifyJWT,addCarController) // post request to add car to DB
+carRouter.route("/:id/rent").post(verifyJWT,rentCarController) // post request to rent car
 carRouter.route("/checkAvailableCars").get(verifyJWT,checkCarAvailabilityController)
 carRouter.route("/listAvailableCars").get(verifyJWT,getAvailableCarsController)
 carRouter.route("/updateCar").patch(verifyJWT,updateCarController)
