@@ -8,7 +8,7 @@ const carRouter = Router()
 carRouter.route("/").post(verifyJWT,addCarController) // post request to add car to DB
 carRouter.route("/:id/rent").post(verifyJWT,rentCarController) // post request to rent car
 carRouter.route("/available").get(verifyJWT,checkCarAvailabilityController)
-carRouter.route("/listAvailableCars").get(verifyJWT,getAvailableCarsController)
+carRouter.route("/").get(verifyJWT,getAvailableCarsController)
 carRouter.route("/:id").patch(verifyJWT,updateCarController)
 carRouter.route("/:id").delete(verifyJWT,deleteCarController)
 carRouter.route("/:id").get(verifyJWT,getCarByIdController)

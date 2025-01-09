@@ -124,27 +124,31 @@ const getCarById = asyncHandler(async(req,res)=>{
 })
 
 const getAvailableCars = asyncHandler(async(req,res)=>{
-    const {userId} = req.query
+    const {userId,available} = req.query
 
-    if(userId == null || userId.trim() == '')
+    if([userId,available].some(value => value == null || value.trim() == ''))
     {
-        throw new ApiError(400,"UserId is required")
+        throw new ApiError(400,"UserId & available fields are required")
     }
-
-    const user = User.findOne({userId})
-
-    if(!user)
+    
+    const user = await User.findOne({userId})
+     if(!user)
     {
         throw new ApiError(401,"User donot exist")
     }
 
-    const availableCars = await Car.find({isAvailability:true}) // await since DB call 
-    
+    const availableCars = await Car.find({isAvailability: true})
+    console.log(availableCars)
+    if(availableCars == null)
+    {
+        throw new ApiError(404,"No cars are available, All are for rent")
+    }
+
     return res.status(200).json({
         response: new ApiResponse(
             200,
-            {
-                availableCars: availableCars
+            {    
+                availableCars
             },
             "List of available cars for rent"
         )
