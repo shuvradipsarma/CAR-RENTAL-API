@@ -25,6 +25,20 @@ const addCar = asyncHandler(async(req,res)=>{
     {
         throw new ApiError(400,"Price per day cannot be negative!")
     }
+    
+    // Check if a car with the same information already exists in the database
+    const existingCar = await Car.findOne({
+        where: {
+            manufacturer,
+            model,
+            year,
+            pricePerDay
+        }
+    })
+
+    if (existingCar) {
+        throw new ApiError(400, "Car already exists in the database!");
+    }
 
     var carAvailability;
 
@@ -36,20 +50,6 @@ const addCar = asyncHandler(async(req,res)=>{
     else
     {
         carAvailability = true // set the default value
-    }
-
-    // Check if a car with the same information already exists in the database
-    const existingCar = await Car.findOne({
-        where: {
-            manufacturer,
-            model,
-            year,
-            pricePerDay
-        }
-    });
-
-    if (existingCar) {
-        throw new ApiError(400, "Car already exists in the database!");
     }
 
     // create the car object 
