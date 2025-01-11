@@ -10,18 +10,21 @@ const addCar = asyncHandler(async(req,res)=>{
     const {manufacturer, model, year, pricePerDay, isAvailability} = req.body
     
     // validity check 
-    if([manufacturer, model, year, pricePerDay, isAvailability].some(value => value == null || value.trim() == ''))
+    if([manufacturer, model, year, pricePerDay, isAvailability].some(value => value == null || value.trim() === ''))
     {
         throw new ApiError(400,"All fields are required")
     }
 
     // check year validity 
+    const carYear = parseInt(year, 10);
     if(year < 1886 || year > new Date().getFullYear())
     {
         throw new ApiError(400,"Invalid Year. Enter between 1886 and Current Year!")
     }
 
-    if(pricePerDay < 0)
+    // check price validity
+    const carPricePerDay = parseFloat(pricePerDay);
+    if(carPricePerDay < 0)
     {
         throw new ApiError(400,"Price per day cannot be negative!")
     }
@@ -29,10 +32,10 @@ const addCar = asyncHandler(async(req,res)=>{
     // Check if a car with the same information already exists in the database
     const existingCar = await Car.findOne({
         where: {
-            manufacturer,
-            model,
-            year,
-            pricePerDay
+            manufacturer: manufacturer.trim(),
+            model: model.trim(),
+            year: carYear,
+            pricePerDay: carPricePerDay
         }
     })
 
