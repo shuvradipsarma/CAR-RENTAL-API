@@ -31,12 +31,10 @@ const addCar = asyncHandler(async(req,res)=>{
     
     // Check if a car with the same information already exists in the database
     const existingCar = await Car.findOne({
-        where: {
-            manufacturer: manufacturer.trim(),
-            model: model.trim(),
-            year: carYear,
-            pricePerDay: carPricePerDay
-        }
+        manufacturer: manufacturer.trim(),
+        model: model.trim(),
+        year: carYear,
+        pricePerDay: carPricePerDay    
     })
 
     if (existingCar) {
